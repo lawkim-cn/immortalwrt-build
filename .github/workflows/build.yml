@@ -1,0 +1,50 @@
+name: Build ImmortalWrt
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'   # 每周日 00:00 UTC（= 北京时间 08:00）
+
+env:
+  TZ: Asia/Shanghai
+  IWRT_REPO: https://github.com/immortalwrt/immortalwrt.git
+  IWRT_BRANCH: master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出本仓库
+        uses: actions/checkout@v4
+
+      - name: 释放磁盘空间
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+
+      - name: 克隆 immortalwrt
+        run: git clone --depth=1 --branch "$IWRT_BRANCH" "$IWRT_REPO" openwrt
+
+      - name: 执行定制脚本
+        run: |
+          cd openwrt
+          REPO_DIR="$GITHUB_WORKSPACE" bash "$GITHUB_WORKSPACE/diy.sh"
+
+      - name: 上传固件
+        uses: actions/upload-artifact@v4
+        with:
+          name: immortalwrt-x86-64
+          path: openwrt/bin/targets/x86/64/*
+
+      - name: 发布 Release
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: openwrt/bin/targets/x86/64/*
+          tag_name: v${{ github.run_number }}
+          name: ImmortalWrt x86/64 固件 v${{ github.run_number }}

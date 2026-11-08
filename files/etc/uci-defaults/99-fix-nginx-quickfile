@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# 开启 Nginx 的 UCI 配置支持
+uci set nginx.global.uci_enable='true'
+
+# 删除旧的 _lan 和 HTTPS 重定向配置（如果存在）
+uci del nginx._lan >/dev/null 2>&1
+uci del nginx._redirect2ssl >/dev/null 2>&1
+
+# 添加一个新的 server 节点
+uci add nginx server
+
+# 重命名刚刚添加的节点（使用 [-1] 代表最新添加的那个，比 [0] 更安全，防止误伤其他配置）
+uci rename nginx.@server[-1]='_lan'
+
+# 配置新 _lan 的各项参数
+uci set nginx._lan.server_name='_lan'
+uci add_list nginx._lan.listen='80 default_server'
+uci add_list nginx._lan.listen='[::]:80 default_server'
+uci add_list nginx._lan.include='conf.d/*.locations'
+uci set nginx._lan.access_log='off; # logd openwrt'
+
+# 提交保存更改
+uci commit nginx
+
+# 脚本执行成功后返回 0（必须要有，系统收到 0 后会自动删除此脚本，确保只执行一次）
+exit 0
