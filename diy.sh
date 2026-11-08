@@ -56,12 +56,16 @@ if [ "$PREPARE_ONLY" = 1 ]; then
   exit 0
 fi
 make download -j8
+
+# 先单独构建 rust host（环境相关最易失败的包），显示完整错误；成功后会被缓存
+if ! make package/feeds/packages/rust/host-compile V=s 2>&1 | tail -200; then
+  echo "================= RUST HOST BUILD FAILED ================="
+  exit 1
+fi
+
+# 全量构建
 if ! make -j"$(nproc)"; then
   set +e
   echo "================= BUILD FAILED ================="
-  echo "--- 磁盘占用 ---"
-  df -h /
-  echo "--- 直接用 V=s 重建 rust 以捕获详细错误 ---"
-  make feeds/packages/lang/rust/host-compile V=s 2>&1 | tail -250
   exit 1
 fi
