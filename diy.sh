@@ -1,7 +1,6 @@
 #!/bin/bash
 # diy.sh — immortalwrt 云编译/本地定制脚本
 # 用法: cd <immortalwrt源码目录> && bash <本仓库路径>/diy.sh [--prepare]
-#   --prepare  仅完成 feed/克隆/替换/配置，不执行编译（用于验证）
 set -euo pipefail
 
 REPO_DIR="${REPO_DIR:-$(cd "$(dirname "$0")" && pwd)}"
@@ -29,10 +28,10 @@ clone https://github.com/sirpdboy/luci-app-adguardhome.git   package/luci-app-ad
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
-# 4) 移除 feeds/luci 自带的 adguardhome（与本地定制一致，避免重复）
+# 4) 移除 feeds/luci 自带的 adguardhome（与本地定制一致）
 rm -rf feeds/luci/applications/luci-app-adguardhome
 
-# 5) 覆盖 feeds 里的 UI 定制文件（备份 -> 替换）
+# 5) 覆盖 feeds 里的 UI 定制文件
 cp -a "$REPO_DIR/custom/luci/."      feeds/luci/
 cp -a "$REPO_DIR/custom/smpackage/." feeds/smpackage/
 
@@ -58,4 +57,13 @@ if [ "$PREPARE_ONLY" = 1 ]; then
   exit 0
 fi
 make download -j8
-make -j"$(nproc)"
+if ! make -j"$(nproc)"; then
+  set +e
+  echo "================= BUILD FAILED ================="
+  find logs -name '*.log' -mmin -8 2>/dev/null > /tmp/diy_alllogs.txt
+  head -6 /tmp/diy_alllogs.txt | while IFS= read -r f; do
+    echo "===== $f ====="
+    tail -n 70 "$f"
+  done
+  exit 1
+fi
