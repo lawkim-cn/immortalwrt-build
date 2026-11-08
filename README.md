@@ -32,7 +32,7 @@ cd openwrt && bash ../diy.sh          # 完整编译
 
 ## 更新插件/immortalwrt 版本
 
-- immortalwrt 本体：改 `build.yml` 里的 `IWRT_BRANCH`（默认 master 跟随最新）
+- immortalwrt 本体：`build.yml` 的 `IWRT_BRANCH` 固定为 `v25.12.0`（与你本地一致，内核 6.12，out-of-tree kmod 兼容）。如需跟随 25.12 维护分支可改为 `openwrt-25.12`
 - 自定义包（honk/nikki/quickfile/daede/lucky/adguardhome）：`diy.sh` 里 `git clone` 跟随上游最新；如需固定版本，把 `--depth=1` 换成 `--depth=1 --branch <tag>`
 
 ## 更新定制文件
