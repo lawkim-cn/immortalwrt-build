@@ -56,17 +56,6 @@ if [ "$PREPARE_ONLY" = 1 ]; then
   exit 0
 fi
 make download -j8
-
-# 先单独构建 rust host（正确目标）；失败则用 V=s 重建以显示真实错误
-if ! make package/feeds/packages/rust/host/compile; then
-  set +e
-  echo "================= RUST HOST BUILD FAILED ================="
-  echo "----------------- V=s 重建输出 -----------------"
-  make package/feeds/packages/rust/host/compile V=s 2>&1 | tail -320
-  exit 1
-fi
-
-# 全量构建
 if ! make -j"$(nproc)"; then
   set +e
   echo "================= BUILD FAILED ================="
