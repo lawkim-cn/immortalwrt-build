@@ -37,6 +37,9 @@ cp -a "$REPO_DIR/custom/smpackage/." feeds/smpackage/
 # 6) 覆盖自定义包内的菜单更名文件
 cp "$REPO_DIR/custom/honk/luci-app-honk/po/zh_Hans/honk.po" \
    package/honk/luci-app-honk/po/zh_Hans/honk.po
+# honk 预编译核心（上游仓库不含，缺失会导致 CI 尝试 Rust 现场编译而失败）
+cp "$REPO_DIR/custom/honk/files/honk-core.bin"       package/honk/honk/files/honk-core.bin
+cp "$REPO_DIR/custom/honk/files/honk-core.bin.stamp" package/honk/honk/files/honk-core.bin.stamp
 cp "$REPO_DIR/custom/daede/luci-app-daede/root/usr/share/luci/menu.d/luci-app-daede.json" \
    package/openwrt-daede/luci-app-daede/root/usr/share/luci/menu.d/luci-app-daede.json
 
