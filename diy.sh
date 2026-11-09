@@ -19,7 +19,11 @@ clone() { [ -d "$2" ] || git clone --depth=1 "$1" "$2"; }
 clone https://github.com/QiuSimons/luci-app-honk.git          package/honk
 clone https://github.com/nikkinikki-org/OpenWrt-nikki.git    package/nikki
 clone https://github.com/wkccd/quickfile.git                 package/quickfile
-clone https://github.com/kenzok8/openwrt-daede.git           package/openwrt-daede
+# openwrt-daede 固定到已验证的 df6a949 (2026.07.08)（最新版 2026.11.05 在 CI 上构建失败）
+if [ ! -d package/openwrt-daede ]; then
+  git clone https://github.com/kenzok8/openwrt-daede.git package/openwrt-daede
+  git -C package/openwrt-daede checkout df6a949
+fi
 clone https://github.com/gdy666/luci-app-lucky.git           package/luci-app-lucky
 clone https://github.com/sirpdboy/luci-app-adguardhome.git   package/luci-app-adguardhome
 
@@ -58,6 +62,8 @@ if [ "$PREPARE_ONLY" = 1 ]; then
   echo "==> 准备完成（--prepare），跳过编译"
   exit 0
 fi
+# 预置 daed/dae 源码（2026.07.08 已从 GitHub releases 下架）
+cp -f "$REPO_DIR/custom/daede/dl/"*.tar.gz dl/ 2>/dev/null || true
 make download -j8
 if ! make -j"$(nproc)"; then
   set +e
