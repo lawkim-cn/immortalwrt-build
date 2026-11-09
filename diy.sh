@@ -63,7 +63,9 @@ if [ "$PREPARE_ONLY" = 1 ]; then
   exit 0
 fi
 # 预置 daed/dae 源码（2026.07.08 已从 GitHub releases 下架）
-cp -f "$REPO_DIR/custom/daede/dl/"*.tar.gz dl/ 2>/dev/null || true
+mkdir -p dl
+cp -f "$REPO_DIR/custom/daede/dl/"*.tar.gz dl/
+ls -la dl/*.tar.gz 2>/dev/null | grep -E 'daed-src|dae-src' || echo "WARNING: daed/dae tarball 未就绪"
 make download -j8
 if ! make -j"$(nproc)"; then
   set +e
