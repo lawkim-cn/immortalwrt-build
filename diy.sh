@@ -57,9 +57,12 @@ if [ "$PREPARE_ONLY" = 1 ]; then
 fi
 make download -j8
 
-# 先单独构建 rust host（环境相关最易失败的包），显示完整错误；成功后会被缓存
-if ! make package/feeds/packages/rust/host-compile V=s 2>&1 | tail -200; then
+# 先单独构建 rust host（正确目标）；失败则用 V=s 重建以显示真实错误
+if ! make package/feeds/packages/rust/host/compile; then
+  set +e
   echo "================= RUST HOST BUILD FAILED ================="
+  echo "----------------- V=s 重建输出 -----------------"
+  make package/feeds/packages/rust/host/compile V=s 2>&1 | tail -320
   exit 1
 fi
 
