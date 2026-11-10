@@ -70,5 +70,9 @@ make download -j8
 if ! make -j"$(nproc)"; then
   set +e
   echo "================= BUILD FAILED ================="
+  echo "--- 磁盘 ---"
+  df -h /
+  echo "--- target/linux install 详细错误 ---"
+  make target/linux/install V=s 2>&1 | tail -200
   exit 1
 fi
